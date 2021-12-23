@@ -1,5 +1,7 @@
 const inquirer = require('inquirer');
 const { stubFalse } = require('lodash');
+const fs = require('fs');
+const generatePage = require('./src/page-template.js');
 
 const promptUser = () => {
     return inquirer.prompt([
@@ -8,7 +10,7 @@ const promptUser = () => {
             name: 'name',
             message: 'What is your name? ',
             validate: nameInput => {
-                if (nameInput){
+                if (nameInput) {
                     return true;
                 } else {
                     console.log('Please enter your name!')
@@ -21,7 +23,7 @@ const promptUser = () => {
             name: 'github',
             message: 'Enter your GitHub Username: ',
             validate: githubInput => {
-                if (githubInput){
+                if (githubInput) {
                     return true;
                 } else {
                     console.log('Please enter your name!')
@@ -39,11 +41,11 @@ const promptUser = () => {
             type: 'input',
             name: 'about',
             message: 'Provide some information about yourself: ',
-            when: ({confirmAbout}) => {
-                if (confirmAbout){
+            when: ({ confirmAbout }) => {
+                if (confirmAbout) {
                     return true;
                 } else {
-                    return false; 
+                    return false;
                 }
             }
         }
@@ -66,7 +68,7 @@ Add a new Project
             name: 'name',
             message: 'What is the name of your project?',
             validate: nameInput => {
-                if (nameInput){
+                if (nameInput) {
                     return true;
                 } else {
                     console.log(`Please enter your project's name!`)
@@ -79,7 +81,7 @@ Add a new Project
             name: 'description',
             message: 'Provide a description of the project (required)',
             validate: descInput => {
-                if (descInput){
+                if (descInput) {
                     return true;
                 } else {
                     console.log(`Please enter your project's description!`)
@@ -98,7 +100,7 @@ Add a new Project
             name: 'link',
             message: 'Enter the GitHub link to your project. (Required)',
             validate: linkInput => {
-                if (linkInput){
+                if (linkInput) {
                     return true;
                 } else {
                     console.log(`Please enter your project's GitHub link!`)
@@ -119,21 +121,27 @@ Add a new Project
             default: false
         }
     ])
-    .then(projectData => {
-        portfolioData.projects.push(projectData);
-        if (projectData.confirmAddProject) {
-          return promptProject(portfolioData);
-        } else {
-          return portfolioData;
-        }
-      });
+        .then(projectData => {
+            portfolioData.projects.push(projectData);
+            if (projectData.confirmAddProject) {
+                return promptProject(portfolioData);
+            } else {
+                return portfolioData;
+            }
+        });
 };
 
 promptUser()
-  .then(promptProject)
-  .then(portfolioData => {
-    console.log(portfolioData);
-});
+    .then(promptProject)
+    .then(portfolioData => {
+        const pageHTML = generatePage(portfolioData);
+
+        fs.writeFile('./index.html', pageHTML, err => {
+            if (err) throw err;
+
+            console.log('Portfolio complete! Check out index.html to see the output!');
+        });
+    });
 
 // promptUser()
 //     .then(answers => console.log(answers))
@@ -146,13 +154,3 @@ promptUser()
 //             return portfolioData;
 //         }
 //     });
-// const fs = require('fs');
-// const generatePage = require('./src/page-template');
-
-// const pageHTML = generatePage(name, github);
-
-// fs.writeFile('./index.html', pageHTML, err => {
-//   if (err) throw err;
-
-//   console.log('Portfolio complete! Check out index.html to see the output!');
-// });
